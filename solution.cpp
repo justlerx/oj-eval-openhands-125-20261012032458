@@ -7,10 +7,9 @@ using namespace std;
 class DSU {
 private:
     vector<int> parent;
-    vector<int> rank;
     
 public:
-    DSU(int n) : parent(n), rank(n, 0) {
+    DSU(int n) : parent(n) {
         for (int i = 0; i < n; i++) {
             parent[i] = i;
         }
@@ -26,15 +25,8 @@ public:
     void unite(int x, int y) {
         int px = find(x);
         int py = find(y);
-        if (px == py) return;
-        
-        if (rank[px] < rank[py]) {
-            parent[px] = py;
-        } else if (rank[px] > rank[py]) {
+        if (px != py) {
             parent[py] = px;
-        } else {
-            parent[py] = px;
-            rank[px]++;
         }
     }
     
