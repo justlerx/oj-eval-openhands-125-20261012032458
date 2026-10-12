@@ -4,18 +4,19 @@
 #include <algorithm>
 using namespace std;
 
-class HashDSU {
+class DSU {
 private:
-    unordered_map<int, int> parent;
-    unordered_map<int, int> rank;
+    vector<int> parent;
+    vector<int> rank;
     
 public:
-    int find(int x) {
-        if (parent.find(x) == parent.end()) {
-            parent[x] = x;
-            rank[x] = 0;
-            return x;
+    DSU(int n) : parent(n), rank(n, 0) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
         }
+    }
+    
+    int find(int x) {
         if (parent[x] != x) {
             parent[x] = find(parent[x]);
         }
@@ -42,10 +43,6 @@ public:
     }
 };
 
-struct Constraint {
-    int i, j, e;
-};
-
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -57,32 +54,53 @@ int main() {
         int n;
         scanf("%d", &n);
         
-        vector<Constraint> constraints;
-        constraints.reserve(n);
+        vector<pair<int, int>> equal_pairs;
+        vector<pair<int, int>> unequal_pairs;
+        equal_pairs.reserve(n);
+        unequal_pairs.reserve(n);
+        
+        vector<int> variables;
+        variables.reserve(n * 2);
         
         for (int k = 0; k < n; k++) {
             int i, j, e;
             scanf("%d %d %d", &i, &j, &e);
-            constraints.push_back({i, j, e});
+            variables.push_back(i);
+            variables.push_back(j);
+            if (e == 1) {
+                equal_pairs.push_back({i, j});
+            } else {
+                unequal_pairs.push_back({i, j});
+            }
         }
         
-        HashDSU dsu;
+        // Coordinate compression
+        sort(variables.begin(), variables.end());
+        variables.erase(unique(variables.begin(), variables.end()), variables.end());
         
-        // Process equality constraints first
-        for (const auto& cons : constraints) {
-            if (cons.e == 1) {
-                dsu.unite(cons.i, cons.j);
-            }
+        unordered_map<int, int> compress;
+        compress.reserve(variables.size() * 2);
+        for (int idx = 0; idx < (int)variables.size(); idx++) {
+            compress[variables[idx]] = idx;
+        }
+        
+        DSU dsu(variables.size());
+        
+        // Process equality constraints
+        for (const auto& pair : equal_pairs) {
+            int ci = compress[pair.first];
+            int cj = compress[pair.second];
+            dsu.unite(ci, cj);
         }
         
         // Check inequality constraints
         bool possible = true;
-        for (const auto& cons : constraints) {
-            if (cons.e == 0) {
-                if (dsu.same(cons.i, cons.j)) {
-                    possible = false;
-                    break;
-                }
+        for (const auto& pair : unequal_pairs) {
+            int ci = compress[pair.first];
+            int cj = compress[pair.second];
+            if (dsu.same(ci, cj)) {
+                possible = false;
+                break;
             }
         }
         
