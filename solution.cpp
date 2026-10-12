@@ -16,10 +16,11 @@ public:
     }
     
     int find(int x) {
-        if (parent[x] != x) {
-            parent[x] = find(parent[x]);
+        while (parent[x] != x) {
+            parent[x] = parent[parent[x]];
+            x = parent[x];
         }
-        return parent[x];
+        return x;
     }
     
     void unite(int x, int y) {
