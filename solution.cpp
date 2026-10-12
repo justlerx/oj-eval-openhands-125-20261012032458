@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 using namespace std;
 
@@ -60,6 +60,8 @@ int main() {
         
         vector<Constraint> constraints;
         vector<int> variables;
+        variables.reserve(n * 2);
+        constraints.reserve(n);
         
         for (int k = 0; k < n; k++) {
             int i, j, e;
@@ -73,8 +75,9 @@ int main() {
         sort(variables.begin(), variables.end());
         variables.erase(unique(variables.begin(), variables.end()), variables.end());
         
-        map<int, int> compress;
-        for (int idx = 0; idx < variables.size(); idx++) {
+        unordered_map<int, int> compress;
+        compress.reserve(variables.size());
+        for (size_t idx = 0; idx < variables.size(); idx++) {
             compress[variables[idx]] = idx;
         }
         
